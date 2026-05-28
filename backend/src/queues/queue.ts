@@ -19,7 +19,7 @@ export const questionGenerationQueue = new Queue<GenerationJobData>(
       },
       removeOnComplete: {
         count: 100,
-        age: 24 * 3600, // 24 hours
+        age: 24 * 3600,
       },
       removeOnFail: {
         count: 50,
@@ -29,22 +29,20 @@ export const questionGenerationQueue = new Queue<GenerationJobData>(
   }
 );
 
-// Queue events for monitoring
 export const queueEvents = new QueueEvents(QUEUE_NAME, {
   connection: getBullMQConnection(),
 });
 
-// Queue event listeners
 queueEvents.on('completed', ({ jobId }) => {
-  console.log(`✅ Job ${jobId} completed`);
+  console.log(`Job ${jobId} completed`);
 });
 
 queueEvents.on('failed', ({ jobId, failedReason }) => {
-  console.error(`❌ Job ${jobId} failed: ${failedReason}`);
+  console.error(`Job ${jobId} failed: ${failedReason}`);
 });
 
 queueEvents.on('progress', ({ jobId, data }) => {
-  console.log(`📊 Job ${jobId} progress: ${data}`);
+  console.log(`Job ${jobId} progress: ${data}`);
 });
 
 // Add job to queue

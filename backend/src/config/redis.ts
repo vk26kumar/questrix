@@ -26,7 +26,6 @@ const connectRedis = (): IORedis => {
   return redis;
 };
 
-// Return plain options instead of IORedis instance — avoids bullmq ioredis version conflict
 export const getBullMQConnection = () => {
   const redisURL = process.env.REDIS_URL;
   if (!redisURL) throw new Error('REDIS_URL is not defined');

@@ -5,8 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ─── Prompt Builder ───────────────────────────────────────────────────────────
-
+//Prompt Builder
 const buildPrompt = (assignment: IAssignment): string => {
   const questionTypesText = assignment.questionTypes
     .map(
@@ -80,11 +79,8 @@ You MUST respond with ONLY a valid JSON object in this EXACT format (no markdown
 Generate the complete question paper now for ${assignment.subject} - Class ${assignment.className}:`;
 };
 
-// ─── Response Parser ──────────────────────────────────────────────────────────
-
 const parseAIResponse = (rawResponse: string): IQuestionPaper => {
   try {
-    // Clean the response — remove any markdown code blocks if present
     let cleanResponse = rawResponse.trim();
 
     if (cleanResponse.startsWith('```json')) {
@@ -95,8 +91,6 @@ const parseAIResponse = (rawResponse: string): IQuestionPaper => {
     }
 
     const parsed = JSON.parse(cleanResponse);
-
-    // Validate required fields
     if (!parsed.sections || !Array.isArray(parsed.sections)) {
       throw new Error('Invalid response: missing sections array');
     }
@@ -104,8 +98,6 @@ const parseAIResponse = (rawResponse: string): IQuestionPaper => {
     if (!parsed.answerKey || !Array.isArray(parsed.answerKey)) {
       throw new Error('Invalid response: missing answerKey array');
     }
-
-    // Sanitize and structure the data
     const questionPaper: IQuestionPaper = {
       schoolName: parsed.schoolName || 'Delhi Public School',
       subject: parsed.subject || 'General',
@@ -142,19 +134,18 @@ const parseAIResponse = (rawResponse: string): IQuestionPaper => {
 
     return questionPaper;
   } catch (error) {
-    console.error('❌ Failed to parse AI response:', error);
+    console.error('Failed to parse AI response:', error);
     console.error('Raw response:', rawResponse);
     throw new Error(`Failed to parse AI response: ${error}`);
   }
 };
 
-// ─── Main Generation Function ─────────────────────────────────────────────────
-
+//Main Generation Function
 export const generateQuestionPaper = async (
   assignment: IAssignment
 ): Promise<IQuestionPaper> => {
   try {
-    console.log(`🤖 Generating question paper for: ${assignment.subject} - ${assignment.className}`);
+    console.log(`Generating question paper for: ${assignment.subject} - ${assignment.className}`);
 
     const prompt = buildPrompt(assignment);
 
@@ -182,17 +173,17 @@ export const generateQuestionPaper = async (
       throw new Error('No response received from OpenAI');
     }
 
-    console.log('✅ AI response received, parsing...');
+    console.log('AI response received, parsing...');
 
     const questionPaper = parseAIResponse(rawResponse);
 
     console.log(
-      `✅ Question paper generated with ${questionPaper.sections.length} sections`
+      `Question paper generated with ${questionPaper.sections.length} sections`
     );
 
     return questionPaper;
   } catch (error) {
-    console.error('❌ AI generation failed:', error);
+    console.error('AI generation failed:', error);
     throw new Error(
       `AI generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     );

@@ -10,6 +10,7 @@ import {
 
 const router = Router();
 
+//Writing for better Understanding and readability of the code for me
 // GET    /api/assignments          → Get all assignments
 // POST   /api/assignments          → Create new assignment
 // GET    /api/assignments/:id      → Get single assignment

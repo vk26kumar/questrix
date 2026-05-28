@@ -1,5 +1,4 @@
-// ─── Question Types ───────────────────────────────────────────────────────────
-
+//Question Types
 export type QuestionType =
   | 'Multiple Choice Questions'
   | 'Short Questions'
@@ -10,8 +9,6 @@ export type QuestionType =
   | 'Fill in the Blanks';
 
 export type DifficultyLevel = 'Easy' | 'Moderate' | 'Challenging';
-
-// ─── Assignment Types ─────────────────────────────────────────────────────────
 
 export interface QuestionTypeConfig {
   type: QuestionType;
@@ -38,20 +35,18 @@ export interface IAssignment {
   updatedAt?: string;
 }
 
-// ─── Question Paper Types ─────────────────────────────────────────────────────
-
 export interface IQuestion {
   questionNumber: number;
   text: string;
   difficulty: DifficultyLevel;
   marks: number;
-  options?: string[]; // for MCQ
+  options?: string[];
 }
 
 export interface ISection {
-  sectionLabel: string; // "A", "B", "C"
-  title: string; // "Short Answer Questions"
-  instruction: string; // "Attempt all questions. Each question carries 2 marks"
+  sectionLabel: string;
+  title: string;
+  instruction: string; 
   questionType: QuestionType;
   questions: IQuestion[];
 }
@@ -79,8 +74,6 @@ export interface IResult {
   createdAt?: string;
 }
 
-// ─── Job Types ────────────────────────────────────────────────────────────────
-
 export interface GenerationJobData {
   assignmentId: string;
   assignment: IAssignment;
@@ -93,8 +86,6 @@ export type JobStatus =
   | 'failed'
   | 'delayed';
 
-// ─── API Response Types ───────────────────────────────────────────────────────
-
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -102,12 +93,10 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// ─── Socket Event Types ───────────────────────────────────────────────────────
-
 export interface JobProgressEvent {
   assignmentId: string;
   status: JobStatus;
-  progress: number; // 0-100
+  progress: number; 
   message: string;
 }
 

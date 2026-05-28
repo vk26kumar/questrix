@@ -15,10 +15,9 @@ const QUEUE_NAME = 'question-generation';
 const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
   const { assignmentId, assignment } = job.data;
 
-  console.log(`🔄 Processing job: ${job.id} for assignment: ${assignmentId}`);
+  console.log(`Processing job: ${job.id} for assignment: ${assignmentId}`);
 
   try {
-    // Step 1 — Update status to processing
     await Assignment.findByIdAndUpdate(assignmentId, {
       status: 'processing',
     });
@@ -32,7 +31,6 @@ const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
 
     await job.updateProgress(10);
 
-    // Step 2 — Generate question paper using AI
     emitJobProgress({
       assignmentId,
       status: 'active',
@@ -52,8 +50,6 @@ const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
     });
 
     await job.updateProgress(70);
-
-    // Step 3 — Save result to MongoDB
     const result = await Result.create({
       assignmentId,
       questionPaper,
@@ -67,8 +63,6 @@ const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
     });
 
     await job.updateProgress(90);
-
-    // Step 4 — Update assignment status to completed
     await Assignment.findByIdAndUpdate(assignmentId, {
       status: 'completed',
     });
@@ -81,25 +75,20 @@ const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
     });
 
     await job.updateProgress(100);
-
-    // Step 5 — Notify frontend
     emitJobComplete({
       assignmentId,
       resultId: result._id.toString(),
       status: 'completed',
     });
 
-    console.log(`✅ Job ${job.id} completed successfully`);
+    console.log(`Job ${job.id} completed successfully`);
 
   } catch (error) {
     console.error(`❌ Job ${job.id} failed:`, error);
-
-    // Update assignment status to failed
     await Assignment.findByIdAndUpdate(assignmentId, {
       status: 'failed',
     });
 
-    // Notify frontend of failure
     emitJobFailed({
       assignmentId,
       status: 'failed',
@@ -110,11 +99,8 @@ const processJob = async (job: Job<GenerationJobData>): Promise<void> => {
   }
 };
 
-// Initialize worker
 const startWorker = async (): Promise<void> => {
-  // Connect to DB
   await connectDB();
-
   const worker = new Worker<GenerationJobData>(
     QUEUE_NAME,
     processJob,
@@ -125,22 +111,22 @@ const startWorker = async (): Promise<void> => {
   );
 
   worker.on('completed', (job) => {
-    console.log(`✅ Worker completed job: ${job.id}`);
+    console.log(`Worker completed job: ${job.id}`);
   });
 
   worker.on('failed', (job, error) => {
-    console.error(`❌ Worker failed job: ${job?.id}`, error);
+    console.error(`Worker failed job: ${job?.id}`, error);
   });
 
   worker.on('active', (job) => {
-    console.log(`🔄 Worker processing job: ${job.id}`);
+    console.log(`Worker processing job: ${job.id}`);
   });
 
-  console.log('🚀 BullMQ Worker started and listening for jobs...');
+  console.log('BullMQ Worker started and listening for jobs...');
 };
 
 startWorker().catch((error) => {
-  console.error('❌ Failed to start worker:', error);
+  console.error('Failed to start worker:', error);
   process.exit(1);
 });
 

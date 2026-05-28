@@ -9,14 +9,14 @@ const connectDB = async (): Promise<void> => {
 
     await mongoose.connect(mongoURI);
 
-    console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
+    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
 
     mongoose.connection.on('error', (err) => {
-      console.error(`❌ MongoDB error: ${err}`);
+      console.error(`MongoDB error: ${err}`);
     });
 
   } catch (error) {
-    console.error(`❌ MongoDB connection failed: ${error}`);
+    console.error(`MongoDB connection failed: ${error}`);
     process.exit(1);
   }
 };

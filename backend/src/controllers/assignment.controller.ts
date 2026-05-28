@@ -6,7 +6,7 @@ import { addGenerationJob } from '../queues/queue';
 import connectRedis from '../config/redis';
 import { ApiResponse, IAssignment } from '../types';
 
-// ─── Validation Schema ────────────────────────────────────────────────────────
+//Validation Schema
 
 const QuestionTypeConfigSchema = z.object({
   type: z.enum([
@@ -39,15 +39,12 @@ const CreateAssignmentSchema = z.object({
   fileName: z.string().optional(),
 });
 
-// ─── Controllers ──────────────────────────────────────────────────────────────
-
-// POST /api/assignments — Create assignment + add to queue
+//Controllers
 export const createAssignment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    // Validate request body
     const validationResult = CreateAssignmentSchema.safeParse(req.body);
 
     if (!validationResult.success) {
@@ -62,16 +59,12 @@ export const createAssignment = async (
     }
 
     const data = validationResult.data;
-
-    // Create assignment in MongoDB
     const assignment = await Assignment.create({
       ...data,
       status: 'pending',
     });
 
     const assignmentId = assignment._id.toString();
-
-    // Add job to BullMQ queue
     await addGenerationJob({
       assignmentId,
       assignment: {
@@ -99,7 +92,6 @@ export const createAssignment = async (
   }
 };
 
-// GET /api/assignments — Get all assignments
 export const getAssignments = async (
   req: Request,
   res: Response
@@ -107,8 +99,6 @@ export const getAssignments = async (
   try {
     const redis = connectRedis();
     const cacheKey = 'assignments:all';
-
-    // Check cache first
     const cached = await redis.get(cacheKey);
     if (cached) {
       res.status(200).json({
@@ -121,8 +111,6 @@ export const getAssignments = async (
     const assignments = await Assignment.find()
       .sort({ createdAt: -1 })
       .lean();
-
-    // Cache for 60 seconds
     await redis.setex(cacheKey, 60, JSON.stringify(assignments));
 
     res.status(200).json({
@@ -140,7 +128,6 @@ export const getAssignments = async (
   }
 };
 
-// GET /api/assignments/:id — Get single assignment
 export const getAssignment = async (
   req: Request,
   res: Response
@@ -149,8 +136,6 @@ export const getAssignment = async (
     const { id } = req.params;
     const redis = connectRedis();
     const cacheKey = `assignment:${id}`;
-
-    // Check cache
     const cached = await redis.get(cacheKey);
     if (cached) {
       res.status(200).json({
@@ -170,7 +155,6 @@ export const getAssignment = async (
       return;
     }
 
-    // Cache for 5 minutes
     await redis.setex(cacheKey, 300, JSON.stringify(assignment));
 
     res.status(200).json({
@@ -197,8 +181,6 @@ export const getAssignmentResult = async (
     const { id } = req.params;
     const redis = connectRedis();
     const cacheKey = `result:${id}`;
-
-    // Check cache
     const cached = await redis.get(cacheKey);
     if (cached) {
       res.status(200).json({
@@ -255,10 +237,7 @@ export const deleteAssignment = async (
       return;
     }
 
-    // Also delete result if exists
     await Result.findOneAndDelete({ assignmentId: id });
-
-    // Clear cache
     await redis.del(`assignment:${id}`);
     await redis.del(`result:${id}`);
     await redis.del('assignments:all');
@@ -297,18 +276,12 @@ export const regenerateAssignment = async (
       return;
     }
 
-    // Delete old result
     await Result.findOneAndDelete({ assignmentId: id });
-
-    // Clear cache
     await redis.del(`result:${id}`);
     await redis.del(`assignment:${id}`);
     await redis.del('assignments:all');
 
-    // Reset status
     await Assignment.findByIdAndUpdate(id, { status: 'pending' });
-
-    // Re-add to queue
     await addGenerationJob({
       assignmentId: id,
       assignment: assignment.toObject() as unknown as IAssignment,

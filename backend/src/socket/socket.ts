@@ -19,22 +19,19 @@ export const initSocket = (httpServer: HTTPServer): SocketIOServer => {
   });
 
   io.on('connection', (socket: Socket) => {
-    console.log(`✅ Client connected: ${socket.id}`);
-
-    // Join room for specific assignment updates
+    console.log(`Client connected: ${socket.id}`);
+    
     socket.on('join:assignment', (assignmentId: string) => {
       socket.join(`assignment:${assignmentId}`);
-      console.log(`📌 Socket ${socket.id} joined room: assignment:${assignmentId}`);
+      console.log(`Socket ${socket.id} joined room: assignment:${assignmentId}`);
     });
-
-    // Leave room
     socket.on('leave:assignment', (assignmentId: string) => {
       socket.leave(`assignment:${assignmentId}`);
-      console.log(`📌 Socket ${socket.id} left room: assignment:${assignmentId}`);
+      console.log(`Socket ${socket.id} left room: assignment:${assignmentId}`);
     });
 
     socket.on('disconnect', () => {
-      console.log(`❌ Client disconnected: ${socket.id}`);
+      console.log(`Client disconnected: ${socket.id}`);
     });
   });
 
@@ -52,14 +49,14 @@ export const emitJobProgress = (data: JobProgressEvent): void => {
 export const emitJobComplete = (data: JobCompleteEvent): void => {
   if (!io) return;
   io.to(`assignment:${data.assignmentId}`).emit('job:complete', data);
-  console.log(`📡 Complete emitted for ${data.assignmentId}`);
+  console.log(`Complete emitted for ${data.assignmentId}`);
 };
 
 // Emit job failed to specific assignment room
 export const emitJobFailed = (data: JobFailedEvent): void => {
   if (!io) return;
   io.to(`assignment:${data.assignmentId}`).emit('job:failed', data);
-  console.log(`📡 Failed emitted for ${data.assignmentId}`);
+  console.log(`Failed emitted for ${data.assignmentId}`);
 };
 
 export const getIO = (): SocketIOServer => {
