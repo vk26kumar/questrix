@@ -22,9 +22,7 @@ interface UseWebSocketOptions {
   onFailed?: (error: string) => void;
 }
 
-const WS_URL = typeof window !== 'undefined'
-  ? (window as any).__NEXT_PUBLIC_WS_URL__ || 'http://localhost:5000'
-  : 'http://localhost:5000';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:5000';
 
 const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const { assignmentId, onComplete, onFailed } = options;
@@ -42,18 +40,18 @@ const useWebSocket = (options: UseWebSocketOptions = {}) => {
     });
 
     socketRef.current.on('connect', () => {
-      console.log('✅ WebSocket connected:', socketRef.current?.id);
+      console.log('WebSocket connected:', socketRef.current?.id);
       if (assignmentId) {
         socketRef.current?.emit('join:assignment', assignmentId);
       }
     });
 
     socketRef.current.on('disconnect', () => {
-      console.log('❌ WebSocket disconnected');
+      console.log('WebSocket disconnected');
     });
 
     socketRef.current.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error);
+      console.error('WebSocket connection error:', error);
     });
 
     socketRef.current.on('job:progress', (data: JobProgressEvent) => {

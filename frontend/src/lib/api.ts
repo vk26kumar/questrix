@@ -1,8 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
-const API_URL = typeof window !== 'undefined'
-  ? (window as any).__NEXT_PUBLIC_API_URL__ || 'http://localhost:5000/api'
-  : 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,

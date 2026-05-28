@@ -78,7 +78,7 @@ const generationMessage = useAppSelector((state) => state.ui.generationMessage);
     const interval = setInterval(async () => {
       attempts++;
       try {
-        const res = await fetch(`http://localhost:5000/api/assignments/${id}/result`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assignments/${id}/result`);
         if (res.ok) {
           clearInterval(interval);
           dispatch(setGenerating(false));
